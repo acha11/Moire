@@ -157,7 +157,10 @@ function setupThreeJs() {
                 layer2.rotation.z -= delta / 1000.0 * params.layer2RotationRate;
             }
 
-            params.differenceInRotation = ((layer2.rotation.z - layer1.rotation.z) / Math.PI * 180) + " deg";
+            var diff = ((layer2.rotation.z - layer1.rotation.z) / Math.PI * 180);
+            var diffTo3Places = Math.round(diff * 1000) / 1000.0;
+            
+            params.differenceInRotation = diffTo3Places + " deg";
 
             differenceInRotationController.updateDisplay();
 
