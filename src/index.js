@@ -37,7 +37,7 @@ var controls;
 
 var params = {
     layer1Opacity: 1.0,
-    layer1RotationEnabled: true,
+    layer1RotationEnabled: false,
     layer1RotationRate: 1,
     layer1ZPosition: 1,
 
@@ -46,10 +46,14 @@ var params = {
     layer2RotationRate: 10,
     layer2ZPosition: 1,
 
+    differenceInRotation: "unset",
+
     backgroundColour: '#3377ff'
 };
 
 var gui = new GUI();
+
+var differenceInRotationController = gui.add(params, 'differenceInRotation');
 
 var layer1Folder = gui.addFolder("Layer 1");
 layer1Folder.open();
@@ -152,6 +156,10 @@ function setupThreeJs() {
             if (params.layer2RotationEnabled) {
                 layer2.rotation.z -= delta / 1000.0 * params.layer2RotationRate;
             }
+
+            params.differenceInRotation = ((layer2.rotation.z - layer1.rotation.z) / Math.PI * 180) + " deg";
+
+            differenceInRotationController.updateDisplay();
 
             controls.update(delta);
 
