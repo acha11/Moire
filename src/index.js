@@ -42,7 +42,7 @@ var mat =
         wireframe: false,
         vertexColors: FaceColors,
         transparent: true,
-        opacity: 0.9,
+        //opacity: 0.9,
         map: texture,
     });
 
@@ -68,10 +68,10 @@ function setupThreeJs() {
             totalElapsed += delta;
 
             // rotate/move the layers
-            layer1.rotation.z -= delta / 100.0;
-            layer1.position.z = Math.sin(totalElapsed / 2.0) * 2;
+            layer1.rotation.z -= delta / 250.0;
+            layer1.position.z = Math.sin(totalElapsed / 20.0) * 2;
 
-            layer2.rotation.z += delta / 10.0;
+            layer2.rotation.z += delta / 25.0;
             layer2.position.y = Math.sin(totalElapsed / 4.0) * 5;
 
             controls.update(delta);
@@ -136,12 +136,13 @@ function buildMeshOfSingleSquare() {
     var normalThatIsOverriddenLater = new Vector3(0, 0, 1);
 
     var numberOfWraps = 1000;
+    var texXScale = 1.5;//0.866025404;
 
     geometry.faces.push(new Face3(0, 1, 2, normalThatIsOverriddenLater, white, 0));
-    geometry.faceVertexUvs[0].push([ new Vector2(0, 0), new Vector2(numberOfWraps, 0), new Vector2(numberOfWraps, numberOfWraps) ]);
+    geometry.faceVertexUvs[0].push([ new Vector2(0, 0), new Vector2(numberOfWraps * texXScale , 0), new Vector2(numberOfWraps * texXScale, numberOfWraps) ]);
 
     geometry.faces.push(new Face3(0, 2, 3, normalThatIsOverriddenLater, white, 0));
-    geometry.faceVertexUvs[0].push([ new Vector2(0, 0), new Vector2(numberOfWraps, numberOfWraps), new Vector2(0, numberOfWraps) ]);
+    geometry.faceVertexUvs[0].push([ new Vector2(0, 0), new Vector2(numberOfWraps * texXScale, numberOfWraps), new Vector2(0, numberOfWraps) ]);
 
 
     geometry.computeFaceNormals();
