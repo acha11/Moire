@@ -18,7 +18,9 @@ import {
     NearestFilter,
     Group,
     BoxGeometry,
-    Matrix4
+    Matrix4,
+    CurvePath,
+    WebGLMultisampleRenderTarget
 } from 'three';
     
 import { OrbitControls } from './OrbitControls.js';
@@ -33,11 +35,86 @@ var scene;
 var camera;
 var controls;
 
+var params = {
+    layer1Opacity: 1.0,
+    layer1RotationEnabled: true,
+    layer1RotationRate: 1,
+    layer1ZPosition: 1,
+
+    layer2Opacity: 1.0,
+    layer2RotationEnabled: true,
+    layer2RotationRate: 10,
+    layer2ZPosition: 1,
+
+    backgroundColour: '#3377ff'
+};
+
+var gui = new GUI();
+
+var layer1Folder = gui.addFolder("Layer 1");
+layer1Folder.open();
+
+layer1Folder.add(params, 'layer1RotationEnabled').name('Enable rotation?').listen();
+layer1Folder.add(params, 'layer1RotationRate', -500, 500).name('Rotation rate').listen();
+
+var layer1OpacityController = layer1Folder.add(params, 'layer1Opacity', 0, 1).name('Opacity').listen();
+var layer1ZPositionController = layer1Folder.add(params, 'layer1ZPosition', -20, 20).name('Z Position').listen();
+
+var layer2Folder = gui.addFolder("Layer 2");
+layer2Folder.open();
+
+layer2Folder.add(params, 'layer2RotationEnabled').name('Enable rotation?').listen();
+layer2Folder.add(params, 'layer2RotationRate', -500, 500).name('Rotation rate').listen();
+
+var layer2OpacityController = layer2Folder.add(params, 'layer2Opacity', 0, 1).name('Opacity').listen();
+var layer2ZPositionController = layer2Folder.add(params, 'layer2ZPosition', -20, 20).name('Z Position').listen();
+
+var backgroundColourController = gui.addColor(params, 'backgroundColour').name('Background colour').listen();
+
+layer1OpacityController.onChange(
+    function(newValue) {
+        mat1.opacity = newValue;
+    }
+);
+
+layer2OpacityController.onChange(
+    function(newValue) {
+        mat2.opacity = newValue;
+    }
+);
+
+layer1ZPositionController.onChange(
+    function(newValue) {
+        layer1.position.set(0, 0, newValue);
+    }
+);
+
+layer2ZPositionController.onChange(
+    function(newValue) {
+        layer2.position.set(0, 0, newValue);
+    }
+);
+
+backgroundColourController.onChange(
+    function(newValue) {
+        scene.background = new Color(newValue);
+    }  
+);
+
 const texture = new TextureLoader().load("textures/triangles.png");
 texture.wrapS = RepeatWrapping;
 texture.wrapT = RepeatWrapping;
 
-var mat = 
+var mat1 = 
+    new MeshBasicMaterial({
+        wireframe: false,
+        vertexColors: FaceColors,
+        transparent: true,
+        //opacity: 0.9,
+        map: texture,
+    });
+
+var mat2 = 
     new MeshBasicMaterial({
         wireframe: false,
         vertexColors: FaceColors,
@@ -68,11 +145,13 @@ function setupThreeJs() {
             totalElapsed += delta;
 
             // rotate/move the layers
-            layer1.rotation.z -= delta / 250.0;
-            layer1.position.z = Math.sin(totalElapsed / 20.0) * 2;
+            if (params.layer1RotationEnabled) {
+                layer1.rotation.z -= delta / 1000.0 * params.layer1RotationRate;
+            }
 
-            layer2.rotation.z += delta / 25.0;
-            layer2.position.y = Math.sin(totalElapsed / 4.0) * 5;
+            if (params.layer2RotationEnabled) {
+                layer2.rotation.z -= delta / 1000.0 * params.layer2RotationRate;
+            }
 
             controls.update(delta);
 
@@ -96,7 +175,7 @@ function renderToThreeJs() {
 
     camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 20000);
 
-    camera.position.set(0, 0, 100);
+    camera.position.set(0, 0, 60);
 
     controls = new OrbitControls(camera, renderer.domElement);
     controls.autoRotate = false;
@@ -120,7 +199,7 @@ function renderToThreeJs() {
     buildScene(scene);
 }
 
-function buildMeshOfSingleSquare() {
+function buildMeshOfSingleSquare(mat) {
     var geometry = new Geometry();
 
     var size = 1000;
@@ -157,11 +236,11 @@ var layer1;
 var layer2;
 
 function buildScene(scene) {
-    layer1 = buildMeshOfSingleSquare();
-    layer2 = buildMeshOfSingleSquare();
+    layer1 = buildMeshOfSingleSquare(mat1);
+    layer2 = buildMeshOfSingleSquare(mat2);
     scene.add(layer1);
 
-    layer2.position.set(0, 0, 2.5);
+    layer2.position.set(0, 0, 1);
     scene.add(layer2);
 
 }
